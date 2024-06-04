@@ -14,10 +14,15 @@ Microservice sử dụng Tiny Yolo v3 neural network để phát hiện vật th
 docker run -d --name detection -p 5000:5000 lephuclai/gp_detection
 ```
 
-Để test phát hiện vật thể với Yolo Webservice:
+Để test phát hiện vật thể từ ảnh với Yolo Webservice:
 
 ```bash
 curl -X PUT -F image_file=@./soccer.jpeg http://localhost:5000/process
+```
+
+Để test phát hiện vật thể từ video với Yolo Webservice:
+```bash
+curl -X PUT -F video_file=@./bottle-detection.mp4 http://localhost:5000/video
 ```
 
 Kết quả trả về sẽ có dạng:
