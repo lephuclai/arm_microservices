@@ -1,0 +1,31 @@
+<html>
+<head>
+	<title>Object List</title>
+	<link rel="stylesheet" type="text/css"  href="{{ url_for('static',filename='assets/style.css')}}" >
+</head>
+<body>
+	<h1>Update</h1>
+	<form action="/action3" method="POST">
+	{% for item in curs %}
+	<br/>
+	<input type="text" name="_id" value="{{ item['_id'] }}" hidden>
+	<table>
+        <tr>
+            <td>Name</td><td><input type="text" name="Name" value="{{ item['Name'] }}" placeholder="{{ item['Name'] }}"></td>
+        </tr>
+        <tr>
+            <td>Confidence</td><td><input type="number" step="any" name="Confidence" value="{{ item['Confidence'] }}" placeholder="{{ item['Confidence'] }}"></td>
+        </tr>
+        <tr>
+            <td>Date and Time</td><td><input type="text" name="DateTime" value="{{ item['DateTime'] }}" placeholder="{{ item['DateTime'] }}"></td>
+        </tr>
+		<tr>
+			<td><button><a href="/">Return to list</a></button></td>
+			<td><button type="submit">Update</button></td>
+		</tr>
+	</table>
+	{% endfor %}
+		<br/>
+	</form>
+</body>
+</html>
