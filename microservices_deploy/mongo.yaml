@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  namespace: serverless
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker1
+      containers:
+      - name: mongo
+        image: mongo:4.4.18-focal
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - mountPath: "/data/db"
+          name: pv-storage
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-user
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-password
+          - name: MONGO_INITDB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-config
+                key: mongo-init-db
+      volumes:
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  namespace: serverless
+spec:
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017

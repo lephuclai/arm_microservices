@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcont-deployment
+  namespace: serverless
+  labels:
+    app: mcont
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcont
+  template:
+    metadata:
+      labels:
+        app: mcont
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker1
+      containers:
+      - name: mongo
+        image: mongo:4.4.18-focal
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - mountPath: "/data/db"
+          name: pv-storage
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-user
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-password
+          - name: MONGO_INITDB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-config
+                key: mongo-init-db
+
+      - name: web
+        image: lephuclai/gp_web:latest@sha256:48ab03fedd8c0efc7750dc30a250c6c0c251832f716cfda1769dc0eca154072c
+        ports:
+        - containerPort: 5500
+        env:
+          - name: MONGODB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-user
+          - name: MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-password
+          - name: MONGODB_HOSTNAME
+            value: localhost
+          - name: MONGODB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-config
+                key: mongo-init-db
+
+      volumes:
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcont-service
+  namespace: serverless
+spec:
+  type: NodePort
+  selector:
+    app: mcont
+  ports:
+    - protocol: TCP
+      port: 5500
+      targetPort: 5500
+      nodePort: 30550

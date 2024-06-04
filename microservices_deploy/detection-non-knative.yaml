@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detection-deployment
+  namespace: serverless
+  labels:
+    app: detection
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: detection
+  template:
+    metadata:
+      labels:
+        app: detection
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker1
+      containers:
+      - name: detection
+        image: lephuclai/gp_detection:latest@sha256:049c21724d65b46800f4f2c5fbc67419b5c53c49e18b6add1af3df28f927b73f
+        ports:
+        - containerPort: 5000
+        env:
+          - name: MONGODB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-user
+          - name: MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-password
+          - name: MONGODB_HOSTNAME
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-config
+                key: mongo-url
+          - name: MONGODB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-config
+                key: mongo-init-db        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: detection-service
+  namespace: serverless
+spec:
+  type: NodePort
+  selector:
+    app: detection
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30500 

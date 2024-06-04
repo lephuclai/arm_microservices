@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+  namespace: serverless
+data:
+  mongo-url: mongo-service
+  mongo-init-db: detection
+  

@@ -1,0 +1,41 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: detection
+  namespace: serverless
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/window: 1000s
+    spec:
+      containers:
+      - env:
+        - name: MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-user
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-password
+        - name: MONGODB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config
+              key: mongo-url
+        - name: MONGODB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config
+              key: mongo-init-db    
+        image: lephuclai/gp_detection:latest@sha256:049c21724d65b46800f4f2c5fbc67419b5c53c49e18b6add1af3df28f927b73f
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: 1000m
+      nodeSelector:
+        kubernetes.io/hostname: worker1
