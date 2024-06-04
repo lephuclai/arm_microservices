@@ -2,7 +2,7 @@
 
 Sơ đồ cấu trúc
 
-![Untitled](arm_microservices%202a1df68f66264a86a89c1a803afb2238/Untitled.png)
+![Untitled](image/Untitled.png)
 
 ## Detection
 
